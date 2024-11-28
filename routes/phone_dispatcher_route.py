@@ -29,3 +29,11 @@ def get_strong_connections():
 
 
 
+@phone_blueprint.route("/device/<device_id>", methods=['GET'])
+def count_device_connections(device_id):
+    repo = Neo4jConnection(current_app.config['NEO4J_DRIVER'])
+    count = (repo.count_device_connections())
+    return jsonify({"device_id": device_id, "connection_count": count})
+
+
+
