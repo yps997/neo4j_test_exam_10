@@ -38,10 +38,8 @@ class Neo4jConnection:
             }]->(d2)
             RETURN id(r) as interaction_id
             """
-
             device1, device2 = data['devices']
             interaction = data['interaction']
-
             result = session.run(query, {
                 'device1_id': device1['id'],
                 'device1_name': device1['name'],
@@ -69,5 +67,16 @@ class Neo4jConnection:
                 'to_accuracy': device2['location']['accuracy_meters']
 
             })
-
             return result.single()['interaction_id']
+
+    def (self):
+        with self.driver.session() as session:
+            query = """
+                    MATCH path = (d1:Device)-[r:CONNECTED*]-(d2:Device)
+                    WHERE all(rel IN r WHERE rel.method = 'Bluetooth')
+                    AND id(d1) < id(d2) 
+                    RETURN d1.id as device1, d2.id as device2, length(path) as path_length
+                    """
+            result = session.run(query)
+            return result.single()
+
