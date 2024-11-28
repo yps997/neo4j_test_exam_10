@@ -14,3 +14,10 @@ def get_interaction():
     return jsonify({"interaction_id": interaction_id}), 201
 
 
+@phone_blueprint.route("/bluetooth-connections", methods=['GET'])
+def get_bluetooth_connections():
+      repo = Neo4jConnection(current_app.config['NEO4J_DRIVER'])
+      interaction_id = (repo.get_bluetooth_connections())
+      return jsonify({"interaction_id": interaction_id}), 201
+
+
