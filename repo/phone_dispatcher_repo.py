@@ -72,10 +72,15 @@ class Neo4jConnection:
     def get_bluetooth_connections(self):
         with self.driver.session() as session:
             query = """
-                    MATCH path = (d1:Device)-[r:CONNECTED*]-(d2:Device)
-                    WHERE all(rel IN r WHERE rel.method = 'Bluetooth')
-                    AND id(d1) < id(d2) 
-                    RETURN d1.id as device1, d2.id as device2, length(path) as path_length
+                    MATCH (start:Device)
+                    MATCH (end:Device)
+                    WHERE start <> end
+                    MATCH path = shortestPath((start)-[:CONNECTED*]->(end))
+                    WHERE ALL(r IN relationships(path) WHERE r.method = 'Bluetooth')
+                    WITH path, length(path) as pathLength
+                    ORDER BY pathLength DESC
+                    LIMIT 1
+                    RETURN length(path)
                     """
             result = session.run(query)
             return result.single()
@@ -90,7 +95,6 @@ class Neo4jConnection:
             result = session.run(query)
             return result.data()
 
-
     def count_device_connections(self, device_id):
         with self.driver.session() as session:
             query = """
@@ -99,7 +103,6 @@ class Neo4jConnection:
                         """
             result = session.run(query, {'device_id': device_id})
             return result.single()['connection_count']
-
 
     def check_direct_connection(self, device1_id, device2_id):
         with self.driver.session() as session:
@@ -111,15 +114,15 @@ class Neo4jConnection:
             result = session.run(query, {'device1_id': device1_id, 'device2_id': device2_id})
             return True if result.single() else False
 
-
     def get_latest_interaction(self, device_id):
         with self.driver.session() as session:
             query = """
-                        MATCH (d:Device {id: $device_id'})-[r:CONNECTED]-(other:Device)
-                        RETURN other.id as other_device, r.timestamp as timestamp,
-                        r.method, r.signal_strength_dbm, r.distance_meters,
-                        r.duration_seconds, r.from_location, r.to_location
-                        ORDER BY r.timestamp DESC
-                       """
+                MATCH (d:Device {id: $device_id})-[r:CONNECTED]-(other:Device)
+                RETURN other.id as other_device, 
+                toString(r.timestamp) as timestamp,
+                r.method, r.signal_strength_dbm, r.distance_meters,
+                r.duration_seconds, r.from_location, r.to_location
+                ORDER BY r.timestamp DESC
+            """
             result = session.run(query, {'device_id': device_id})
             return result.single()
