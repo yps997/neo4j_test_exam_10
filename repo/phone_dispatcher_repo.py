@@ -69,7 +69,7 @@ class Neo4jConnection:
             })
             return result.single()['interaction_id']
 
-    def (self):
+    def get_bluetooth_connections (self):
         with self.driver.session() as session:
             query = """
                     MATCH path = (d1:Device)-[r:CONNECTED*]-(d2:Device)
@@ -79,4 +79,14 @@ class Neo4jConnection:
                     """
             result = session.run(query)
             return result.single()
+
+    def get_strong_connections(self):
+        with self.driver.session() as session:
+            query = """
+                    MATCH (d1:Device)-[r:CONNECTED]-(d2:Device)
+                    WHERE r.signal_strength_dbm > -60
+                    RETURN d1.id as device1, d2.id as device2, r.signal_strength_dbm as signal_strength
+                    """
+            result = session.run(query)
+            return result.data()
 
