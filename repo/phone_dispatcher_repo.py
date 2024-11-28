@@ -69,7 +69,7 @@ class Neo4jConnection:
             })
             return result.single()['interaction_id']
 
-    def get_bluetooth_connections (self):
+    def get_bluetooth_connections(self):
         with self.driver.session() as session:
             query = """
                     MATCH path = (d1:Device)-[r:CONNECTED*]-(d2:Device)
@@ -89,4 +89,16 @@ class Neo4jConnection:
                     """
             result = session.run(query)
             return result.data()
+
+
+    def count_device_connections(self, device_id):
+        with self.driver.session() as session:
+            query = """
+                        MATCH (d:Device {id: $device_id})-[r:CONNECTED]-()
+                        RETURN count(r) as connection_count
+                        """
+            result = session.run(query, {'device_id': device_id})
+            return result.single()['connection_count']
+
+
 
