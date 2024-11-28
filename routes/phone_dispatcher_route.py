@@ -36,4 +36,13 @@ def count_device_connections(device_id):
     return jsonify({"device_id": device_id, "connection_count": count})
 
 
+@phone_blueprint.route("/direct-connection/<device1_id>, <device2_id>", methods=['GET'])
+def check_direct_connection():
+    device1_id = request.args.get('device1')
+    device2_id = request.args.get('device2')
+    repo = Neo4jConnection(current_app.config['NEO4J_DRIVER'])
+    has_connection = (repo.check_direct_connection(device1_id,device2_id))
+    return jsonify({"has_direct_connection": has_connection})
+
+
 
