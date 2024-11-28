@@ -12,3 +12,5 @@ def get_interaction():
     repo = Neo4jConnection(current_app.config['NEO4J_DRIVER'])
     interaction_id = (repo.create_interaction(interaction_data))
     return jsonify({"interaction_id": interaction_id}), 201
+
+
