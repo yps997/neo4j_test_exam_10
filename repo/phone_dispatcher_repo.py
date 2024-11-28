@@ -112,3 +112,14 @@ class Neo4jConnection:
             return True if result.single() else False
 
 
+    def get_latest_interaction(self, device_id):
+        with self.driver.session() as session:
+            query = """
+                        MATCH (d:Device {id: $device_id'})-[r:CONNECTED]-(other:Device)
+                        RETURN other.id as other_device, r.timestamp as timestamp,
+                        r.method, r.signal_strength_dbm, r.distance_meters,
+                        r.duration_seconds, r.from_location, r.to_location
+                        ORDER BY r.timestamp DESC
+                       """
+            result = session.run(query, {'device_id': device_id})
+            return result.single()
