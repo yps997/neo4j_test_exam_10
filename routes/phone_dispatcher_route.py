@@ -21,3 +21,11 @@ def get_bluetooth_connections():
       return jsonify({"interaction_id": interaction_id}), 201
 
 
+@phone_blueprint.route("/strong-connections", methods=['GET'])
+def get_strong_connections():
+    repo = Neo4jConnection(current_app.config['NEO4J_DRIVER'])
+    interaction_id = (repo.get_strong_connections())
+    return jsonify({"interaction_id": interaction_id}), 201
+
+
+
