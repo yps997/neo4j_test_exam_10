@@ -98,8 +98,8 @@ class Neo4jConnection:
     def count_device_connections(self, device_id):
         with self.driver.session() as session:
             query = """
-                        MATCH (d:Device {id: $device_id})-[r:CONNECTED]-()
-                        RETURN count(r) as connection_count
+                        MATCH (d:Device {id: $device_id})-[r:CONNECTED]-(other:Device)
+                        RETURN count(DISTINCT other) as connection_count
                         """
             result = session.run(query, {'device_id': device_id})
             return result.single()['connection_count']
