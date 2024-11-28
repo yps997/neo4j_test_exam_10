@@ -45,4 +45,9 @@ def check_direct_connection():
     return jsonify({"has_direct_connection": has_connection})
 
 
+@phone_blueprint.route("/api/device/latest-interaction/<device_id>", methods=['GET'])
+def get_latest_interaction(device_id):
+    repo = Neo4jConnection(current_app.config['NEO4J_DRIVER'])
+    result= (repo.get_latest_interaction(device_id))
+      return jsonify(dict(record) if record else {"message": "No interactions found"})
 
