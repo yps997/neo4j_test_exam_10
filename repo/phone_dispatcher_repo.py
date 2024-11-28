@@ -101,4 +101,14 @@ class Neo4jConnection:
             return result.single()['connection_count']
 
 
+    def check_direct_connection(self, device1_id, device2_id):
+        with self.driver.session() as session:
+            query = """
+                       MATCH (d1:Device {id: $device1_id})
+                       MATCH (d2:Device {id: $device2_id})
+                       RETURN exists((d1)-[:CONNECTED]-(d2)) as has_connection
+                       """
+            result = session.run(query, {'device1_id': device1_id, 'device2_id': device2_id})
+            return True if result.single() else False
+
 
